@@ -1,4 +1,4 @@
-name: Backend CI/CD
+name: Backend CI/CD 🚀
 
 on:
   push:
@@ -10,17 +10,16 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: 🔄 Checkout code
+      - name: ⏬ Checkout code
         uses: actions/checkout@v3
 
-      - name: 🟢 Setup Node.js
+      - name: 🧰 Set up Node.js
         uses: actions/setup-node@v3
         with:
           node-version: 23
-          cache: 'npm'
 
       - name: 📦 Install dependencies
-        run: npm install
+        run: npm ci
         working-directory: ./backend
 
       - name: 🛠️ Build backend
@@ -33,7 +32,7 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: 🐳 Build & Push Docker image
+      - name: 🐳 Build and push Docker image
         uses: docker/build-push-action@v4
         with:
           context: ./backend
