@@ -2,9 +2,9 @@ pipeline {
   agent any
 
   environment {
-    DOCKERHUB_CREDENTIALS = '149a660c-4391-4cd4-8950-851538eedb0f'   // Jenkins Docker Hub credentials ID
-    SMTP_CREDENTIALS = 'smtp-creds'              // Jenkins SMTP credentials ID
-    DOCKER_IMAGE = 'mehediimun/real-time-queue-backend'  // Docker Hub image name
+    DOCKERHUB_CREDENTIALS = ''   // Jenkins Docker Hub credentials ID
+    SMTP_CREDENTIALS = ''              // Jenkins SMTP credentials ID
+    DOCKER_IMAGE = ''  // Docker Hub image name
     EMAIL_TO = 'mehediimun@gmail.com'          // Email recipient
   }
 
