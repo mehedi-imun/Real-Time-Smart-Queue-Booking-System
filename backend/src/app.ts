@@ -27,7 +27,6 @@ app.use(cors({
     origin: envVars.FRONTEND_URL,
     credentials: true
 }))
-console.log(`Express session secret: ${envVars.EXPRESS_SESSION_SECRET}`)
 app.use("/api/v1", router)
 
 app.get("/", (req: Request, res: Response) => {
