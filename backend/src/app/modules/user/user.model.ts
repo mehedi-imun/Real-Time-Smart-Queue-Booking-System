@@ -22,7 +22,7 @@ const userSchema = new Schema<IUser>(
       lowercase: true,
       index: true,
     },
-    password: { type: String},
+    password: { type: String },
     role: {
       type: String,
       enum: Object.values(Role),
