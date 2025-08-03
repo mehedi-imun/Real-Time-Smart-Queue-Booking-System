@@ -23,17 +23,17 @@ export enum IsActive {
 }
 
 export interface IUser {
-    _id: string;
+  _id?: string;
   name: string;
   email: string;
   password?: string;
   role: Role;
-  isDeleted: boolean;
-  isActive: IsActive;
-  isVerified: boolean;
+  isDeleted?: boolean;
+  isActive?: IsActive;
+  isVerified?: boolean;
   auths: IAuthProvider[];
-  lastLoginAt: Date;
-  passwordResetToken: {
+  lastLoginAt?: Date;
+  passwordResetToken?: {
     token: string;
     expiresAt: Date;
   };

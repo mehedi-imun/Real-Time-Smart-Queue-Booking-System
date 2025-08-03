@@ -11,8 +11,8 @@ services:
     env_file:
       - ./backend/.env
     volumes:
-      - ./backend:/app # 🧠 Mount local code to container
-      - /app/node_modules # 📦 Ignore host node_modules to avoid conflicts
+      - ./backend:/app #Mount local code to container
+      - /app/node_modules #Ignore host node_modules to avoid conflicts
     restart: unless-stopped
     healthcheck:
       test: ["CMD-SHELL", "curl --fail http://localhost:5000 || exit 1"]
