@@ -10,6 +10,9 @@ services:
       - "5000:5000"
     env_file:
       - ./backend/.env
+    volumes:
+      - ./backend:/app #Mount local code to container
+      - /app/node_modules #Ignore host node_modules to avoid conflicts
     restart: unless-stopped
     healthcheck:
       test: ["CMD-SHELL", "curl --fail http://localhost:5000 || exit 1"]
@@ -31,25 +34,6 @@ services:
           memory: 256M
     networks:
       - cicd-network
-
-  jenkins:
-    container_name: jenkins
-    image: jenkins/jenkins:lts
-    user: root
-    ports:
-      - "8080:8080"
-      - "50000:50000"
-    volumes:
-      - jenkins_home:/var/jenkins_home
-      - /var/run/docker.sock:/var/run/docker.sock
-    restart: unless-stopped
-    networks:
-      - cicd-network
-    environment:
-      - JAVA_OPTS=-Djenkins.install.runSetupWizard=false
-
-volumes:
-  jenkins_home:
 
 networks:
   cicd-network:
