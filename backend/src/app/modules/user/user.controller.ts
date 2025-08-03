@@ -9,8 +9,10 @@ import { UserServices } from "./user.service";
 
 const createUser = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
+    if (req.file) {
+      req.body.picture = req.file.path;
+    }
     const user = await UserServices.createUser(req.body);
-
     sendResponse(res, {
       success: true,
       statusCode: httpStatus.CREATED,

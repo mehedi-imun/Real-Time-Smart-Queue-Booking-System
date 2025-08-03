@@ -29,6 +29,7 @@ const userSchema = new Schema<IUser>(
       default: Role.USER,
       index: true,
     },
+    picture: { type: String},
     isDeleted: { type: Boolean, default: false },
     isActive: {
       type: String,
