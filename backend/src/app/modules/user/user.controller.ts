@@ -12,6 +12,7 @@ const createUser = catchAsync(
     if (req.file) {
       req.body.picture = req.file.path;
     }
+
     const user = await UserServices.createUser(req.body);
     sendResponse(res, {
       success: true,
