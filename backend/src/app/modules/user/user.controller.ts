@@ -53,11 +53,6 @@ const getAllUsers = catchAsync(
       query as Record<string, string>
     );
 
-    // res.status(httpStatus.OK).json({
-    //     success: true,
-    //     message: "All Users Retrieved Successfully",
-    //     data: users
-    // })
     sendResponse(res, {
       success: true,
       statusCode: httpStatus.CREATED,
@@ -71,12 +66,6 @@ const getMe = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const decodedToken = req.user as JwtPayload;
     const result = await UserServices.getMe(decodedToken.userId);
-
-    // res.status(httpStatus.OK).json({
-    //     success: true,
-    //     message: "All Users Retrieved Successfully",
-    //     data: users
-    // })
     sendResponse(res, {
       success: true,
       statusCode: httpStatus.CREATED,
@@ -98,8 +87,6 @@ const getSingleUser = catchAsync(
   }
 );
 
-// function => try-catch catch => req-res function
-
 export const UserControllers = {
   createUser,
   getAllUsers,
@@ -107,5 +94,3 @@ export const UserControllers = {
   updateUser,
   getMe,
 };
-
-// route matching -> controller -> service -> model -> DB

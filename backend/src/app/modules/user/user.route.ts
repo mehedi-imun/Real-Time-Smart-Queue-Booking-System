@@ -30,5 +30,4 @@ router.patch(
   checkAuth(...Object.values(Role)),
   UserControllers.updateUser
 );
-// /api/v1/user/:id
 export const UserRoutes = router;
