@@ -165,9 +165,9 @@ const googleCallbackController = catchAsync(
 
     const tokenInfo = await createUserTokens(user);
 
-    setAuthCookie(res, tokenInfo);
+     setAuthCookie(res, tokenInfo);
 
-    res.redirect(`${envVars.FRONTEND_URL}/${redirectTo}`);
+    res.redirect(`${envVars.FRONTEND_URL}/`);
   }
 );
 

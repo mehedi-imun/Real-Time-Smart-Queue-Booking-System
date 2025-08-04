@@ -10,16 +10,17 @@ export const setAuthCookie = (res: Response, tokenInfo: AuthTokens) => {
     if (tokenInfo.accessToken) {
         res.cookie("accessToken", tokenInfo.accessToken, {
             httpOnly: true,
-            secure: envVars.NODE_ENV === "production",
-            sameSite: "none"
+            // secure: envVars.NODE_ENV === "production",
+            // sameSite: "none"
+            secure: false, // For development purposes, set to true in production
         })
     }
 
     if (tokenInfo.refreshToken) {
         res.cookie("refreshToken", tokenInfo.refreshToken, {
             httpOnly: true,
-            secure: envVars.NODE_ENV === "production",
-            sameSite: "none"
+            secure: false, // For development purposes, set to true in production
+          
         })
     }
 }

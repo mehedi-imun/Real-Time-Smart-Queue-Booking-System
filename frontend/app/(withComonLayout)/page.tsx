@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import socket from "../utils/socket";
-
+// import socket from "./utils/socket";
 
 export default function BookingPage() {
   const [eventId] = useState("68905e4f3e9692e13e37e8e6"); // Replace with real eventId
