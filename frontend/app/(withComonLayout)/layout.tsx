@@ -1,3 +1,4 @@
+import Navbar from "@/components/shared/navbar/Navbar";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -13,8 +14,7 @@ export default async function RootLayout({
   //   const user = await userInfo();
   return (
     <div>
-      {/* <NavBar user={user} /> */}
-      nav
+      <Navbar></Navbar>
       <div className="mx-auto container">{children}</div>
       footer
       {/* <Footer /> */}

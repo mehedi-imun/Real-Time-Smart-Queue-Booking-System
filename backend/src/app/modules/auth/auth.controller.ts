@@ -25,7 +25,6 @@ const credentialsLogin = catchAsync(
 
       const userTokens = await createUserTokens(user);
 
-
       const { password: pass, ...rest } = user.toObject();
 
       setAuthCookie(res, userTokens);
@@ -35,7 +34,6 @@ const credentialsLogin = catchAsync(
         statusCode: httpStatus.OK,
         message: "User Logged In Successfully",
         data: {
-
           user: rest,
         },
       });
@@ -70,12 +68,14 @@ const logout = catchAsync(
     res.clearCookie("accessToken", {
       httpOnly: true,
       secure: false,
-      sameSite: "lax",
+      path: "/",
+      sameSite: "none",
     });
     res.clearCookie("refreshToken", {
       httpOnly: true,
       secure: false,
-      sameSite: "lax",
+      path: "/",
+      sameSite: "none",
     });
 
     sendResponse(res, {
@@ -165,7 +165,7 @@ const googleCallbackController = catchAsync(
 
     const tokenInfo = await createUserTokens(user);
 
-     setAuthCookie(res, tokenInfo);
+    setAuthCookie(res, tokenInfo);
 
     res.redirect(`${envVars.FRONTEND_URL}/`);
   }

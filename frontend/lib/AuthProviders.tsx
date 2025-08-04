@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
+import { userInfo } from "@/app/(withComonLayout)/actions/auth";
 import { createContext, useContext, useEffect, useState } from "react";
 
 export const AuthContext = createContext<any>({
@@ -11,14 +12,15 @@ export const AuthContext = createContext<any>({
 export const AuthProvider = ({ children }: any) => {
   const [user, setUser] = useState<any>(null);
 
-  //   const x = async () => {
-  //     const res = await userInfo();
-  //     setUser(res);
-  //   };
+  const x = async () => {
+    const res = await userInfo();
+    
+    setUser(res);
+  };
 
-//   useEffect(() => {
-//     x();
-//   }, []);
+  useEffect(() => {
+    x();
+  }, []);
 
   return (
     <AuthContext.Provider value={{ user, setUser }}>
