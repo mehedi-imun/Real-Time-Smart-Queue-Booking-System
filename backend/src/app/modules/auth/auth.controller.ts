@@ -23,6 +23,13 @@ const credentialsLogin = catchAsync(
         return next(new AppError(401, info.message));
       }
 
+      if (user.isDeleted) {
+        return next(new AppError(401, "User is deleted"));
+      }
+      if (user.isActive === "BLOCKED" || user.isActive === "INACTIVE") {
+        return next(new AppError(401, `User is ${user.isActive}`));
+      }
+
       const userTokens = await createUserTokens(user);
 
       const { password: pass, ...rest } = user.toObject();
@@ -33,9 +40,7 @@ const credentialsLogin = catchAsync(
         success: true,
         statusCode: httpStatus.OK,
         message: "User Logged In Successfully",
-        data: {
-          user: rest,
-        },
+        data: rest
       });
     })(req, res, next);
   }
@@ -54,7 +59,6 @@ const getNewAccessToken = catchAsync(
     );
 
     setAuthCookie(res, tokenInfo);
-
     sendResponse(res, {
       success: true,
       statusCode: httpStatus.OK,
@@ -68,14 +72,12 @@ const logout = catchAsync(
     res.clearCookie("accessToken", {
       httpOnly: true,
       secure: false,
-      path: "/",
-      sameSite: "none",
+      
     });
     res.clearCookie("refreshToken", {
       httpOnly: true,
       secure: false,
-      path: "/",
-      sameSite: "none",
+      
     });
 
     sendResponse(res, {

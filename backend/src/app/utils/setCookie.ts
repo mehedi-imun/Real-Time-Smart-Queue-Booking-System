@@ -11,6 +11,8 @@ export const setAuthCookie = (res: Response, tokenInfo: AuthTokens) => {
       httpOnly: true,
       // secure: envVars.NODE_ENV === "production",
       // sameSite: "none"
+      sameSite: "lax",
+      path: "/",
       secure: false, // For development purposes, set to true in production
     });
   }
@@ -18,6 +20,8 @@ export const setAuthCookie = (res: Response, tokenInfo: AuthTokens) => {
   if (tokenInfo.refreshToken) {
     res.cookie("refreshToken", tokenInfo.refreshToken, {
       httpOnly: true,
+      sameSite: "lax",
+      path: "/",
       secure: false, // For development purposes, set to true in production
     });
   }
