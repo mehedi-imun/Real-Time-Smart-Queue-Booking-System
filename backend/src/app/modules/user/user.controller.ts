@@ -5,6 +5,8 @@ import httpStatus from "http-status-codes";
 import { JwtPayload } from "jsonwebtoken";
 import { catchAsync } from "../../utils/catchAsync";
 import { sendResponse } from "../../utils/sendResponse";
+import { setAuthCookie } from "../../utils/setCookie";
+import { createUserTokens } from "../../utils/userTokens";
 import { UserServices } from "./user.service";
 
 const createUser = catchAsync(
@@ -14,6 +16,8 @@ const createUser = catchAsync(
     }
 
     const user = await UserServices.createUser(req.body);
+    const userTokens = await createUserTokens(user);
+    setAuthCookie(res, userTokens);
     sendResponse(res, {
       success: true,
       statusCode: httpStatus.CREATED,

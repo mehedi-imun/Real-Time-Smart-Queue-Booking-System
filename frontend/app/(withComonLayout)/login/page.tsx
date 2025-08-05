@@ -28,7 +28,7 @@ export default function LoginPage() {
       setMessage(data.message || "Login failed");
     } else {
       setMessage("Login success!");
-      window.location.href = "/"; // redirect after login
+      window.location.href = "/";
     }
   };
 
@@ -73,6 +73,16 @@ export default function LoginPage() {
             Continue with Google
           </Button>
         </a>
+
+         <div className="mt-4 text-center text-sm text-gray-600">
+          Don&apos;t have an account?{" "}
+          <a
+            href="/register"
+            className="text-blue-600 hover:underline font-medium"
+          >
+            Create one
+          </a>
+        </div>
       </div>
     </div>
   );
