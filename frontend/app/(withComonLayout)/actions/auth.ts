@@ -12,7 +12,7 @@ export const userInfo = async () => {
     return {
       email: decodedData.email,
       role: decodedData.role,
-      id: decodedData.id,
+      id: decodedData.userId,
     };
   } else {
     return null;
