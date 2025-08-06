@@ -6,11 +6,13 @@ import { useEffect, useState } from "react";
 import CountdownTimer from "../CountdownTimer";
 
 interface BookingStatus {
-  status: "queued" | "success" | "failed" | "error" | "";
+  status: "idle" | "queued" | "success" | "failed" | "error";
   message: string;
-  position?: number;
-  availableSlots?: number;
-  bookingData?: any;
+}
+
+interface QueueSerial {
+  userId: string;
+  serial: number;
 }
 
 interface BookingPageProps {
@@ -31,11 +33,13 @@ export default function BookingPage({
   const { user } = useAuth();
 
   const [bookingStatus, setBookingStatus] = useState<BookingStatus>({
-    status: "",
+    status: "idle",
     message: "",
   });
   const [availableSlots, setAvailableSlots] = useState<number>(totalSlots);
   const [queuePosition, setQueuePosition] = useState<number | null>(null);
+  const [queueSerials, setQueueSerials] = useState<QueueSerial[]>([]);
+  const [estimatedWaitTimeSeconds, setEstimatedWaitTimeSeconds] = useState<number>(0);
 
   useEffect(() => {
     if (!user || !user.id) return;
@@ -43,9 +47,8 @@ export default function BookingPage({
     socket.emit("join-event", eventId);
 
     socket.on("booking-status", (data: BookingStatus & { userId?: string }) => {
-      if (data && data.status) {
-        setBookingStatus(data);
-      }
+      if (!data || !data.status) return;
+      setBookingStatus(data);
     });
 
     socket.on(
@@ -54,8 +57,11 @@ export default function BookingPage({
         availableSlots: number;
         queueLength: number;
         userQueuePositions: Record<string, number>;
+        queueSerials?: QueueSerial[];
+        estimatedWaitTimeSeconds?: Record<string, number>;
       }) => {
         setAvailableSlots(data.availableSlots);
+
         if (
           data.userQueuePositions &&
           data.userQueuePositions[user.id] !== undefined
@@ -64,6 +70,21 @@ export default function BookingPage({
         } else {
           setQueuePosition(null);
         }
+
+        if (data.queueSerials) {
+          setQueueSerials(data.queueSerials);
+        } else {
+          setQueueSerials([]);
+        }
+
+        if (
+          data.estimatedWaitTimeSeconds &&
+          data.estimatedWaitTimeSeconds[user.id] !== undefined
+        ) {
+          setEstimatedWaitTimeSeconds(data.estimatedWaitTimeSeconds[user.id]);
+        } else {
+          setEstimatedWaitTimeSeconds(0);
+        }
       }
     );
 
@@ -71,9 +92,8 @@ export default function BookingPage({
       socket.off("booking-status");
       socket.off("event-update");
     };
-  }, [eventId, user?.id]);
+  }, [eventId, user, user?.id]);
 
-  // Guard against unauthenticated user
   if (!user || !user.id) {
     return (
       <div className="max-w-lg mx-auto p-6 bg-white rounded shadow-md mt-40 text-center text-red-600">
@@ -83,57 +103,101 @@ export default function BookingPage({
   }
 
   const handleBooking = () => {
-    if (bookingStatus.status === "queued") return; // prevent multiple requests
+    if (bookingStatus.status === "queued" || bookingStatus.status === "success") return;
 
     setBookingStatus({ status: "queued", message: "Booking request sent..." });
     socket.emit("request-booking", { eventId, userId: user.id });
   };
-  console.log(eventEndsAt);
+
+  const userSerial =
+    queueSerials.find((q) => q.userId === user.id)?.serial ?? null;
+
   return (
     <div className="max-w-lg mx-auto p-6 bg-white rounded shadow-md mt-40">
       <h1 className="text-2xl font-bold mb-4">{eventTitle}</h1>
 
-      <div className="mb-4">
-        <strong>Queue Type:</strong> {queueType} <br />
-        <strong>Available Slots:</strong> {availableSlots} <br />
-        <strong>Your Queue Position:</strong> {queuePosition ?? "N/A"} <br />
+      <div className="mb-4 space-y-1">
+        <div>
+          <strong>Queue Type:</strong> {queueType}
+        </div>
+        <div>
+          <strong>Available Slots:</strong> {availableSlots}
+        </div>
+        {bookingStatus.status === "queued" && (
+          <>
+            <div>
+              <strong>Your Queue Position:</strong> {queuePosition ?? "N/A"}
+            </div>
+            <div>
+              <strong>Your Serial Number:</strong> {userSerial ?? "N/A"}
+            </div>
+            <div>
+              <strong>Estimated Wait Time:</strong>{" "}
+              {estimatedWaitTimeSeconds > 0
+                ? `${Math.ceil(estimatedWaitTimeSeconds / 60)} min`
+                : "N/A"}
+            </div>
+          </>
+        )}
         <CountdownTimer endsAt={eventEndsAt} />
       </div>
 
-      <button
-        disabled={
-          bookingStatus.status === "success" ||
-          bookingStatus.status === "queued" ||
-          availableSlots === 0
-        }
-        onClick={handleBooking}
-        className={`w-full py-2 rounded text-white font-semibold ${
-          bookingStatus.status === "success"
-            ? "bg-green-600 cursor-not-allowed"
-            : bookingStatus.status === "queued"
-            ? "bg-yellow-500 cursor-not-allowed"
-            : availableSlots === 0
-            ? "bg-gray-400 cursor-not-allowed"
-            : "bg-blue-600 hover:bg-blue-700"
-        }`}
-        aria-live="polite"
-      >
-        {bookingStatus.status === "success"
-          ? "Booking Confirmed"
-          : bookingStatus.status === "queued"
-          ? "Booking in Queue..."
-          : availableSlots === 0
-          ? "No Slots Available"
-          : "Book Now"}
-      </button>
+      {bookingStatus.status === "idle" && (
+        <button
+          disabled={availableSlots === 0}
+          onClick={handleBooking}
+          className={`w-full py-2 rounded text-white font-semibold ${
+            availableSlots === 0
+              ? "bg-gray-400 cursor-not-allowed"
+              : "bg-blue-600 hover:bg-blue-700"
+          }`}
+          aria-live="polite"
+        >
+          {availableSlots === 0 ? "No Slots Available" : "Book Now"}
+        </button>
+      )}
 
-      {bookingStatus.message && (
+      {bookingStatus.status === "queued" && (
+        <button
+          disabled
+          className="w-full py-2 rounded bg-yellow-500 text-white font-semibold cursor-not-allowed"
+          aria-live="polite"
+        >
+          Booking in Queue...
+        </button>
+      )}
+
+      {bookingStatus.status === "success" && (
+        <button
+          disabled
+          className="w-full py-2 rounded bg-green-600 text-white font-semibold cursor-not-allowed"
+          aria-live="polite"
+        >
+          Booking Confirmed
+        </button>
+      )}
+
+      {(bookingStatus.status === "failed" || bookingStatus.status === "error") && (
+        <>
+          <button
+            onClick={handleBooking}
+            className="w-full py-2 rounded bg-blue-600 hover:bg-blue-700 text-white font-semibold"
+          >
+            Retry Booking
+          </button>
+          <p
+            className="mt-3 text-red-600 font-medium"
+            role="alert"
+          >
+            {bookingStatus.message}
+          </p>
+        </>
+      )}
+
+      {bookingStatus.status !== "failed" && bookingStatus.status !== "error" && bookingStatus.message && (
         <p
           className={`mt-3 font-medium ${
-            bookingStatus.status === "failed" ||
-            bookingStatus.status === "error"
-              ? "text-red-600"
-              : bookingStatus.status === "success"
+            bookingStatus.status === "success"
               ? "text-green-600"
               : bookingStatus.status === "queued"
               ? "text-yellow-600"
