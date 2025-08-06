@@ -188,13 +188,25 @@ export default function EventsPage() {
   // Skeleton loader UI
   function SkeletonCard() {
     return (
-      <div className="animate-pulse bg-white rounded-lg shadow-md overflow-hidden h-[250px]">
-        <div className="bg-gray-300 h-36 w-full" />
-        <div className="p-6 space-y-3">
-          <div className="h-6 bg-gray-300 rounded w-3/4" />
-          <div className="h-4 bg-gray-300 rounded w-1/2" />
-          <div className="h-4 bg-gray-300 rounded w-1/3" />
-          <div className="inline-block mt-3 px-3 py-1 bg-gray-300 rounded-full w-16 h-6" />
+      <div className="relative animate-pulse rounded-lg shadow-md overflow-hidden h-[250px] bg-black text-white">
+        {/* Background Gradient Layer */}
+        <div
+          className="absolute inset-0 z-0"
+          style={{
+            background:
+              "radial-gradient(ellipse 80% 60% at 50% 0%, rgba(120, 180, 255, 0.25), transparent 70%), #000000",
+          }}
+        />
+
+        {/* Skeleton Content */}
+        <div className="relative z-10">
+          <div className="h-36 w-full bg-gray-700/50" />
+          <div className="p-6 space-y-3">
+            <div className="h-6 bg-gray-700/70 rounded w-3/4" />
+            <div className="h-4 bg-gray-700/70 rounded w-1/2" />
+            <div className="h-4 bg-gray-700/70 rounded w-1/3" />
+            <div className="inline-block mt-3 px-3 py-1 bg-gray-700/70 rounded-full w-16 h-6" />
+          </div>
         </div>
       </div>
     );
@@ -251,24 +263,16 @@ export default function EventsPage() {
   }
 
   return (
-    <div className="min-h-screen w-full relative bg-white">
+    <div className="min-h-screen w-full relative bg-black text-white">
       <div
         className="absolute inset-0 z-0"
         style={{
-          background: "#ffffff",
-          backgroundImage: `
-        radial-gradient(
-          circle at top center,
-          rgba(70, 130, 180, 0.5),
-          transparent 70%
-        )
-      `,
-          filter: "blur(80px)",
-          backgroundRepeat: "no-repeat",
+          background:
+            "radial-gradient(ellipse 80% 60% at 50% 0%, rgba(120, 180, 255, 0.25), transparent 70%), #000000",
         }}
       />
       {/* Your Content/Components */}
-      <div className="min-h-screen relative  mt-16 max-w-7xl mx-auto py-12 px-6 md:px-12 lg:px-24">
+      <div className="relative z-10 container mx-auto px-6 sm:px-8 md:px-12 lg:px-20 xl:px-28 2xl:px-32 py-30 ">
         {/* Filters & Search - Top Centered */}
         <section className="flex flex-col md:flex-row items-center justify-center gap-6 mb-12 flex-wrap">
           {/* Search */}
