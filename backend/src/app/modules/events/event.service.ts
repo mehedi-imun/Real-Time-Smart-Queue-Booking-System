@@ -1,13 +1,23 @@
+import { QueryBuilder } from "../../utils/QueryBuilder";
 import { IEvent } from "./event.interface";
 import { Event } from "./events.model";
 
 export const createEvent = async (data: IEvent) => {
-  console.log(data)
   return await Event.create(data);
 };
 
-export const getAllEvents = async () => {
-  return await Event.find().sort({ createdAt: -1 });
+export const getAllEvents = async (query: Record<string, string>) => {
+  const queryBuilder = new QueryBuilder(Event.find(), query)
+    .filter()
+    .search(["title", "description"]) 
+    .sort()
+    .fields()
+    .paginate();
+
+  const data = await queryBuilder.build();
+  const meta = await queryBuilder.getMeta();
+
+  return { data, meta };
 };
 
 export const getEventById = async (id: string) => {
