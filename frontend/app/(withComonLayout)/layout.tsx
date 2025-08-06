@@ -1,3 +1,4 @@
+import Footer from "@/components/shared/Footer";
 import Navbar from "@/components/shared/navbar/Navbar";
 import type { Metadata } from "next";
 
@@ -16,8 +17,7 @@ export default async function RootLayout({
     <div>
       <Navbar></Navbar>
       <div className="">{children}</div>
-      <footer></footer>
-      {/* <Footer /> */}
+      <Footer></Footer>
     </div>
   );
 }
