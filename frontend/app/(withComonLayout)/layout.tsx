@@ -2,8 +2,8 @@ import Navbar from "@/components/shared/navbar/Navbar";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Apollo Gears",
-  description: "Book your next adventure with Apollo Gears.",
+  title: "queue-booking-system",
+  description: "Book your next adventure with queue-booking-system.",
 };
 
 export default async function RootLayout({
@@ -15,8 +15,8 @@ export default async function RootLayout({
   return (
     <div>
       <Navbar></Navbar>
-      <div className="mx-auto container">{children}</div>
-      footer
+      <div className="">{children}</div>
+      <footer></footer>
       {/* <Footer /> */}
     </div>
   );

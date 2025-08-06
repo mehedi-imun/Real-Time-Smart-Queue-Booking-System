@@ -16,7 +16,7 @@ export default function RootLayout({
     <html lang="en">
       <body  cz-shortcut-listen="true">
         <Providers>
-          <div className="mx-auto container">{children}</div>
+          <div >{children}</div>
         </Providers>
       </body>
     </html>
