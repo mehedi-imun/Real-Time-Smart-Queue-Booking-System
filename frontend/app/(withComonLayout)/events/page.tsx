@@ -21,6 +21,7 @@ type EventType = {
   _id: string;
   title: string;
   image?: string;
+  description: string;
   startsAt: string;
   endsAt: string;
   queueType: "FIFO" | "PRIORITY";
@@ -199,6 +200,56 @@ export default function EventsPage() {
     );
   }
 
+  function Countdown({ endDate }: { endDate: string }) {
+    const calculateTimeLeft = () => {
+      const difference = +new Date(endDate) - +new Date();
+      let timeLeft = {
+        days: 0,
+        hours: 0,
+        minutes: 0,
+        seconds: 0,
+      };
+      if (difference > 0) {
+        timeLeft = {
+          days: Math.floor(difference / (1000 * 60 * 60 * 24)),
+          hours: Math.floor((difference / (1000 * 60 * 60)) % 24),
+          minutes: Math.floor((difference / 1000 / 60) % 60),
+          seconds: Math.floor((difference / 1000) % 60),
+        };
+      }
+      return timeLeft;
+    };
+
+    const [timeLeft, setTimeLeft] = useState(calculateTimeLeft());
+
+    useEffect(() => {
+      const timer = setInterval(() => {
+        setTimeLeft(calculateTimeLeft());
+      }, 1000);
+
+      return () => clearInterval(timer);
+    }, [endDate]);
+
+    if (
+      timeLeft.days <= 0 &&
+      timeLeft.hours <= 0 &&
+      timeLeft.minutes <= 0 &&
+      timeLeft.seconds <= 0
+    ) {
+      return <span className="text-red-600 font-semibold">Event Ended</span>;
+    }
+
+    return (
+      <div className="mt-2 text-sm font-mono text-gray-700">
+        Ends in:{" "}
+        <span className="font-semibold text-blue-600">
+          {timeLeft.days}d {timeLeft.hours}h {timeLeft.minutes}m{" "}
+          {timeLeft.seconds}s
+        </span>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen mt-16 max-w-7xl mx-auto py-12 px-6 md:px-12 lg:px-24">
       {/* Filters & Search - Top Centered */}
@@ -300,31 +351,58 @@ export default function EventsPage() {
             <div className="grid gap-6 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
               {events.map((event) => (
                 <Link key={event._id} href={`/events/${event._id}`}>
-                  <div className="bg-white text-black shadow-md rounded-lg overflow-hidden hover:shadow-lg transition-shadow duration-300 cursor-pointer">
-                    <Image
-                      src={event.image || "/default-event-image.jpg"}
-                      alt={event.title}
-                      width={600}
-                      height={192}
-                      className="w-full h-44 object-cover"
-                      style={{ objectFit: "cover" }}
-                      priority={false}
-                      placeholder="blur"
-                      blurDataURL="/default-event-image.jpg"
-                    />
-                    <div className="p-6">
-                      <h2 className="text-xl font-semibold mb-2">
+                  <div className="bg-white text-black shadow-lg rounded-lg overflow-hidden hover:shadow-2xl transition-shadow duration-300 cursor-pointer flex flex-col">
+                    <div className="relative w-full h-44 md:h-48 lg:h-44 xl:h-52">
+                      <Image
+                        src={event.image || "/default-event-image.jpg"}
+                        alt={event.title}
+                        fill
+                        className="object-cover"
+                        priority={false}
+                        placeholder="blur"
+                        blurDataURL="/default-event-image.jpg"
+                      />
+                    </div>
+                    <div className="p-6 flex flex-col flex-grow">
+                      <h2 className="text-2xl font-semibold mb-2 line-clamp-1">
                         {event.title}
                       </h2>
-                      <p className="text-gray-600 text-sm mb-1">
-                        Starts: {new Date(event.startsAt).toLocaleString()}
+                      <p className="text-gray-700 mb-3 line-clamp-3">
+                        {event.description}
                       </p>
-                      <p className="text-gray-600 text-sm">
-                        Ends: {new Date(event.endsAt).toLocaleString()}
-                      </p>
-                      <span className="inline-block mt-3 px-3 py-1 text-xs font-bold rounded-full bg-blue-100 text-blue-800">
-                        {event.queueType}
-                      </span>
+
+                      <div className="flex flex-wrap justify-between text-gray-600 text-sm mb-3 gap-2">
+                        <p>
+                          <strong>Starts:</strong>{" "}
+                          {new Date(event.startsAt).toLocaleString(undefined, {
+                            dateStyle: "medium",
+                            timeStyle: "short",
+                          })}
+                        </p>
+                        <p>
+                          <strong>Ends:</strong>{" "}
+                          {new Date(event.endsAt).toLocaleString(undefined, {
+                            dateStyle: "medium",
+                            timeStyle: "short",
+                          })}
+                        </p>
+                      </div>
+
+                      <div className="flex items-center justify-between mt-auto">
+                        <span className="inline-block px-3 py-1 text-xs font-bold rounded-full bg-blue-100 text-blue-800">
+                          {event.queueType}
+                        </span>
+
+                        <span
+                          className={`text-sm font-semibold ${
+                            event.isActive ? "text-green-600" : "text-red-600"
+                          }`}
+                        >
+                          {event.isActive ? "Active" : "Inactive"}
+                        </span>
+                      </div>
+
+                      <Countdown endDate={event.endsAt} />
                     </div>
                   </div>
                 </Link>
