@@ -251,169 +251,192 @@ export default function EventsPage() {
   }
 
   return (
-    <div className="min-h-screen mt-16 max-w-7xl mx-auto py-12 px-6 md:px-12 lg:px-24">
-      {/* Filters & Search - Top Centered */}
-      <section className="flex flex-col md:flex-row items-center justify-center gap-6 mb-12 flex-wrap">
-        {/* Search */}
-        <Input
-          aria-label="Search events by title"
-          placeholder="Search by event title..."
-          value={search}
-          onChange={(e: ChangeEvent<HTMLInputElement>) => {
-            setPage(1);
-            setSearch(e.target.value);
-          }}
-          className="bg-transparent border border-gray-600 placeholder-gray-400  focus:ring-2 focus:ring-blue-600 focus:border-blue-600 max-w-sm w-full"
-        />
+    <div className="min-h-screen w-full relative bg-white">
+      <div
+        className="absolute inset-0 z-0"
+        style={{
+          background: "#ffffff",
+          backgroundImage: `
+        radial-gradient(
+          circle at top center,
+          rgba(70, 130, 180, 0.5),
+          transparent 70%
+        )
+      `,
+          filter: "blur(80px)",
+          backgroundRepeat: "no-repeat",
+        }}
+      />
+      {/* Your Content/Components */}
+      <div className="min-h-screen relative  mt-16 max-w-7xl mx-auto py-12 px-6 md:px-12 lg:px-24">
+        {/* Filters & Search - Top Centered */}
+        <section className="flex flex-col md:flex-row items-center justify-center gap-6 mb-12 flex-wrap">
+          {/* Search */}
+          <Input
+            aria-label="Search events by title"
+            placeholder="Search by event title..."
+            value={search}
+            onChange={(e: ChangeEvent<HTMLInputElement>) => {
+              setPage(1);
+              setSearch(e.target.value);
+            }}
+            className="bg-transparent border border-gray-600 placeholder-gray-400  focus:ring-2 focus:ring-blue-600 focus:border-blue-600 max-w-sm w-full"
+          />
 
-        {/* Queue Type */}
-        <Select
-          value={queueTypeRaw}
-          onValueChange={(val) => {
-            setPage(1);
-            setQueueTypeRaw(val);
-          }}
-          aria-label="Filter by queue type"
-        >
-          <SelectTrigger className="bg-transparent border border-gray-600   focus:ring-2 focus:ring-blue-600 focus:border-blue-600">
-            <SelectValue placeholder="Queue Type" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectGroup>
-              {queueTypes.map(({ label, value }) => (
-                <SelectItem key={value} value={value}>
-                  {label}
-                </SelectItem>
-              ))}
-            </SelectGroup>
-          </SelectContent>
-        </Select>
+          {/* Queue Type */}
+          <Select
+            value={queueTypeRaw}
+            onValueChange={(val) => {
+              setPage(1);
+              setQueueTypeRaw(val);
+            }}
+            aria-label="Filter by queue type"
+          >
+            <SelectTrigger className="bg-transparent border border-gray-600   focus:ring-2 focus:ring-blue-600 focus:border-blue-600">
+              <SelectValue placeholder="Queue Type" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectGroup>
+                {queueTypes.map(({ label, value }) => (
+                  <SelectItem key={value} value={value}>
+                    {label}
+                  </SelectItem>
+                ))}
+              </SelectGroup>
+            </SelectContent>
+          </Select>
 
-        {/* Status */}
-        <Select
-          value={statusRaw}
-          onValueChange={(val) => {
-            setPage(1);
-            setStatusRaw(val);
-          }}
-          aria-label="Filter by event status"
-        >
-          <SelectTrigger className="bg-transparent border border-gray-600   focus:ring-2 focus:ring-blue-600 focus:border-blue-600">
-            <SelectValue placeholder="Status" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectGroup>
-              {statusOptions.map(({ label, value }) => (
-                <SelectItem key={value} value={value}>
-                  {label}
-                </SelectItem>
-              ))}
-            </SelectGroup>
-          </SelectContent>
-        </Select>
+          {/* Status */}
+          <Select
+            value={statusRaw}
+            onValueChange={(val) => {
+              setPage(1);
+              setStatusRaw(val);
+            }}
+            aria-label="Filter by event status"
+          >
+            <SelectTrigger className="bg-transparent border border-gray-600   focus:ring-2 focus:ring-blue-600 focus:border-blue-600">
+              <SelectValue placeholder="Status" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectGroup>
+                {statusOptions.map(({ label, value }) => (
+                  <SelectItem key={value} value={value}>
+                    {label}
+                  </SelectItem>
+                ))}
+              </SelectGroup>
+            </SelectContent>
+          </Select>
 
-        {/* Reset */}
-        <Button
-          variant="outline"
-          onClick={resetFilters}
-          className="border-gray-600 hover:bg-gray-800   whitespace-nowrap"
-          aria-label="Reset filters"
-        >
-          Reset
-        </Button>
-      </section>
+          {/* Reset */}
+          <Button
+            variant="outline"
+            onClick={resetFilters}
+            className="bg-transparent border border-gray-600 cursor-pointer"
+            aria-label="Reset filters"
+          >
+            Reset
+          </Button>
+        </section>
 
-      {/* Events Grid */}
-      <section>
-        <h1
-          className="font-extrabold mb-6 text-center  "
-          style={{ fontSize: "clamp(1.5rem, 4vw, 2.5rem)" }}
-        >
-          📅 Upcoming Queue Events
-        </h1>
+        {/* Events Grid */}
+        <section>
+          <h1
+            className="font-extrabold mb-6 text-center  "
+            style={{ fontSize: "clamp(1.5rem, 4vw, 2.5rem)" }}
+          >
+            📅 Upcoming Queue Events
+          </h1>
 
-        {loading && (
-          <div className="grid gap-6 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-            {[...Array(PAGE_SIZE)].map((_, idx) => (
-              <SkeletonCard key={idx} />
-            ))}
-          </div>
-        )}
-
-        {error && <p className="text-center text-red-500">{error}</p>}
-
-        {!loading && !error && events.length === 0 && (
-          <p className="text-center text-gray-400">No upcoming events found.</p>
-        )}
-
-        {!loading && !error && events.length > 0 && (
-          <>
+          {loading && (
             <div className="grid gap-6 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-              {events.map((event) => (
-                <Link key={event._id} href={`/events/${event._id}`}>
-                  <div className="bg-white text-black shadow-lg rounded-lg overflow-hidden hover:shadow-2xl transition-shadow duration-300 cursor-pointer flex flex-col">
-                    <div className="relative w-full h-44 md:h-48 lg:h-44 xl:h-52">
-                      <Image
-                        src={event.image || "/default-event-image.jpg"}
-                        alt={event.title}
-                        fill
-                        className="object-cover"
-                        priority={false}
-                        placeholder="blur"
-                        blurDataURL="/default-event-image.jpg"
-                      />
-                    </div>
-                    <div className="p-6 flex flex-col flex-grow">
-                      <h2 className="text-2xl font-semibold mb-2 line-clamp-1">
-                        {event.title}
-                      </h2>
-                      <p className="text-gray-700 mb-3 line-clamp-3">
-                        {event.description}
-                      </p>
-
-                      <div className="flex flex-wrap justify-between text-gray-600 text-sm mb-3 gap-2">
-                        <p>
-                          <strong>Starts:</strong>{" "}
-                          {new Date(event.startsAt).toLocaleString(undefined, {
-                            dateStyle: "medium",
-                            timeStyle: "short",
-                          })}
-                        </p>
-                        <p>
-                          <strong>Ends:</strong>{" "}
-                          {new Date(event.endsAt).toLocaleString(undefined, {
-                            dateStyle: "medium",
-                            timeStyle: "short",
-                          })}
-                        </p>
-                      </div>
-
-                      <div className="flex items-center justify-between mt-auto">
-                        <span className="inline-block px-3 py-1 text-xs font-bold rounded-full bg-blue-100 text-blue-800">
-                          {event.queueType}
-                        </span>
-
-                        <span
-                          className={`text-sm font-semibold ${
-                            event.isActive ? "text-green-600" : "text-red-600"
-                          }`}
-                        >
-                          {event.isActive ? "Active" : "Inactive"}
-                        </span>
-                      </div>
-
-                      <Countdown endDate={event.endsAt} />
-                    </div>
-                  </div>
-                </Link>
+              {[...Array(PAGE_SIZE)].map((_, idx) => (
+                <SkeletonCard key={idx} />
               ))}
             </div>
+          )}
 
-            {/* Pagination */}
-            <Pagination />
-          </>
-        )}
-      </section>
+          {error && <p className="text-center text-red-500">{error}</p>}
+
+          {!loading && !error && events.length === 0 && (
+            <p className="text-center text-gray-400">
+              No upcoming events found.
+            </p>
+          )}
+
+          {!loading && !error && events.length > 0 && (
+            <>
+              <div className="grid gap-6 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+                {events.map((event) => (
+                  <Link key={event._id} href={`/events/${event._id}`}>
+                    <div className="bg-white text-black shadow-lg rounded-lg overflow-hidden hover:shadow-2xl transition-shadow duration-300 cursor-pointer flex flex-col">
+                      <div className="relative w-full h-44 md:h-48 lg:h-44 xl:h-52">
+                        <Image
+                          src={event.image || "/default-event-image.jpg"}
+                          alt={event.title}
+                          fill
+                          className="object-cover"
+                          priority={false}
+                          placeholder="blur"
+                          blurDataURL="/default-event-image.jpg"
+                        />
+                      </div>
+                      <div className="p-6 flex flex-col flex-grow">
+                        <h2 className="text-2xl font-semibold mb-2 line-clamp-1">
+                          {event.title}
+                        </h2>
+                        <p className="text-gray-700 mb-3 line-clamp-3">
+                          {event.description}
+                        </p>
+
+                        <div className="flex flex-wrap justify-between text-gray-600 text-sm mb-3 gap-2">
+                          <p>
+                            <strong>Starts:</strong>{" "}
+                            {new Date(event.startsAt).toLocaleString(
+                              undefined,
+                              {
+                                dateStyle: "medium",
+                                timeStyle: "short",
+                              }
+                            )}
+                          </p>
+                          <p>
+                            <strong>Ends:</strong>{" "}
+                            {new Date(event.endsAt).toLocaleString(undefined, {
+                              dateStyle: "medium",
+                              timeStyle: "short",
+                            })}
+                          </p>
+                        </div>
+
+                        <div className="flex items-center justify-between mt-auto">
+                          <span className="inline-block px-3 py-1 text-xs font-bold rounded-full bg-blue-100 text-blue-800">
+                            {event.queueType}
+                          </span>
+
+                          <span
+                            className={`text-sm font-semibold ${
+                              event.isActive ? "text-green-600" : "text-red-600"
+                            }`}
+                          >
+                            {event.isActive ? "Active" : "Inactive"}
+                          </span>
+                        </div>
+
+                        <Countdown endDate={event.endsAt} />
+                      </div>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+
+              {/* Pagination */}
+              <Pagination />
+            </>
+          )}
+        </section>
+      </div>
     </div>
   );
 }
