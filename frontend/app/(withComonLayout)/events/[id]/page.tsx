@@ -1,16 +1,23 @@
 import { getEventById } from "@/lib/api";
+import { CalendarDays, Clock, Ticket, Users } from "lucide-react";
 import { Metadata } from "next";
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import AddToCalendar from "./AddToCalendar";
+import BookingPage from "./BookingPage";
 import CountdownTimer from "./CountdownTimer";
 import ShareQRCode from "./ShareQRCode";
 
 export const dynamic = "force-dynamic";
 
-export async function generateMetadata({ params }: { params: { id: string } }): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+}: {
+  params: { id: string };
+}): Promise<Metadata> {
   const event = await getEventById(params.id);
   if (!event) return { title: "Event Not Found" };
+
   return {
     title: event.title,
     description: event.description,
@@ -20,43 +27,110 @@ export async function generateMetadata({ params }: { params: { id: string } }): 
   };
 }
 
-export default async function EventDetailsPage({ params }: { params: { id: string } }) {
+export default async function EventDetailsPage({
+  params,
+}: {
+  params: { id: string };
+}) {
   const event = await getEventById(params.id);
   if (!event) return notFound();
 
   return (
-    <div className="max-w-4xl mx-auto p-6 text-white">
-      <Image
-        src={event.image}
-        alt={event.title}
-        width={1000}
-        height={400}
-        className="rounded-xl w-full h-[300px] object-cover"
-        priority
+    <div className="min-h-screen w-full relative text-white">
+      {/* Background Gradient */}
+      <div
+        className="absolute inset-0 z-0"
+        style={{
+          background:
+            "radial-gradient(125% 125% at 50% 100%, #000000 40%, #010133 100%)",
+        }}
       />
 
-      <div className="mt-6 space-y-4">
-        <h1 className="text-3xl font-bold">{event.title}</h1>
-        <p className="text-lg text-gray-300">{event.description}</p>
-
-        <div className="text-sm text-gray-400 space-y-1">
-          <p><strong>Starts:</strong> {new Date(event.startsAt).toLocaleString()}</p>
-          <p><strong>Ends:</strong> {new Date(event.endsAt).toLocaleString()}</p>
-          <p><strong>Slots:</strong> {event.totalSlots}</p>
-          <p><strong>Queue:</strong> {event.queueType}</p>
+      <div className="relative z-10 container mx-auto px-6 sm:px-8 md:px-12 lg:px-20 xl:px-28 2xl:px-32 py-30 space-y-12">
+        {/* Event Image */}
+        <div className="rounded-xl overflow-hidden shadow-lg">
+          <Image
+            src={event.image}
+            alt={event.title}
+            width={1200}
+            height={600}
+            className="w-full h-[350px] object-cover"
+            priority
+          />
         </div>
 
-        <CountdownTimer endsAt={event.endsAt} />
-        <AddToCalendar event={event} />
-        <ShareQRCode url={`${process.env.NEXT_PUBLIC_FRONTEND_URL}/events/${event._id}`} />
+        {/* Title & Description */}
+        <div className="space-y-4">
+          <h1 className="text-4xl font-extrabold tracking-tight">
+            {event.title}
+          </h1>
+          <p className="text-lg text-gray-300 leading-relaxed">
+            {event.description}
+          </p>
+        </div>
 
-        <div className="mt-8">
-          <a
-            href={`/events/${event._id}/book`}
-            className="inline-block bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition"
-          >
-            Book Now
-          </a>
+        {/* Metadata Section */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 bg-gray-900/50 p-6 rounded-lg border border-gray-700">
+          <div className="flex items-start space-x-3">
+            <CalendarDays className="w-5 h-5 text-blue-400 mt-1" />
+            <div>
+              <p className="font-medium text-white">Starts</p>
+              <p>{new Date(event.startsAt).toLocaleString()}</p>
+            </div>
+          </div>
+
+          <div className="flex items-start space-x-3">
+            <Clock className="w-5 h-5 text-blue-400 mt-1" />
+            <div>
+              <p className="font-medium text-white">Ends</p>
+              <p>{new Date(event.endsAt).toLocaleString()}</p>
+            </div>
+          </div>
+
+          <div className="flex items-start space-x-3">
+            <Users className="w-5 h-5 text-blue-400 mt-1" />
+            <div>
+              <p className="font-medium text-white">Total Slots</p>
+              <p>{event.totalSlots}</p>
+            </div>
+          </div>
+
+          <div className="flex items-start space-x-3">
+            <Ticket className="w-5 h-5 text-blue-400 mt-1" />
+            <div>
+              <p className="font-medium text-white">Queue Type</p>
+              <p>{event.queueType}</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Action Tools */}
+        <div className="bg-gray-900/50 p-6 rounded-lg border border-gray-700">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="flex justify-center items-center">
+              <AddToCalendar event={event} />
+            </div>
+
+            <div className="flex justify-center items-center">
+              <ShareQRCode
+                url={`${process.env.NEXT_PUBLIC_FRONTEND_URL}/events/${event._id}`}
+              />
+            </div>
+
+            <div className="flex justify-center items-center">
+              <CountdownTimer endsAt={event.endsAt} />
+            </div>
+
+            <div className="flex justify-center items-center">
+              <BookingPage
+                eventId={event._id}
+                eventTitle={event.title}
+                eventEndsAt={event.endsAt}
+                totalSlots={event.totalSlots}
+                queueType={event.queueType}
+              />
+            </div>
+          </div>
         </div>
       </div>
     </div>
