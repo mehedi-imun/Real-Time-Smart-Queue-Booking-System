@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 interface BookingStatus {
   status: "idle" | "queued" | "success" | "failed" | "error";
   message: string;
+  userId?: string;
 }
 
 interface QueueSerial {
@@ -17,9 +18,9 @@ interface QueueSerial {
 interface BookingPageProps {
   eventId: string;
   eventTitle: string;
-  eventEndsAt: string;
+  eventEndsAt?: string;
   totalSlots: number;
-  queueType: string;
+  queueType?: string;
 }
 
 export default function BookingPage({
@@ -34,48 +35,41 @@ export default function BookingPage({
     message: "",
   });
   const [availableSlots, setAvailableSlots] = useState<number>(totalSlots);
-  const [queuePosition, setQueuePosition] = useState<number | null>(null);
-  const [queueSerials, setQueueSerials] = useState<QueueSerial[]>([]);
-  const [estimatedWaitTime, setEstimatedWaitTime] = useState<number>(0);
-
-  // Extract user's serial number from queue
-  const userSerial =
-    queueSerials.find((q) => q.userId === user?.id)?.serial ?? null;
 
   useEffect(() => {
     if (!user?.id) return;
 
+    // Join event room for real-time updates
     socket.emit("join-event", eventId);
 
-    // Listen for booking status update
-    socket.on("booking-status", (data: BookingStatus & { userId?: string }) => {
-      if (data?.status) {
-        setBookingStatus(data);
+    // Booking status updates
+    const handleBookingStatus = (data: BookingStatus) => {
+      console.log(data);
+      if (!data?.userId || data.userId === user.id) {
+        setBookingStatus({
+          status: data.status,
+          message: data.message,
+        });
       }
-    });
+    };
 
-    // Listen for real-time updates
-    socket.on(
-      "event-update",
-      (data: {
-        availableSlots: number;
-        queueLength: number;
-        userQueuePositions: Record<string, number>;
-        queueSerials?: QueueSerial[];
-        estimatedWaitTimeSeconds?: Record<string, number>;
-      }) => {
-        setAvailableSlots(data.availableSlots);
+    // Event/queue updates
+    const handleEventUpdate = (data: {
+      availableSlots: number;
+      queueLength: number;
+      userQueuePositions: Record<string, number>;
+      queueSerials?: QueueSerial[];
+      estimatedWaitTimeSeconds?: Record<string, number>;
+    }) => {
+      setAvailableSlots(data.availableSlots);
+    };
 
-        // Update queue position
-        setQueuePosition(data.userQueuePositions?.[user.id] ?? null);
-        setQueueSerials(data.queueSerials || []);
-        setEstimatedWaitTime(data.estimatedWaitTimeSeconds?.[user.id] ?? 0);
-      }
-    );
+    socket.on("booking-status", handleBookingStatus);
+    socket.on("event-update", handleEventUpdate);
 
     return () => {
-      socket.off("booking-status");
-      socket.off("event-update");
+      socket.off("booking-status", handleBookingStatus);
+      socket.off("event-update", handleEventUpdate);
     };
   }, [user?.id, eventId]);
 
@@ -88,7 +82,7 @@ export default function BookingPage({
       message: "Booking request sent...",
     });
 
-    socket.emit("request-booking", { eventId, userId: user.id });
+    socket.emit("request-booking", { eventId, userId: user?.id });
   };
 
   if (!user?.id) {
@@ -98,23 +92,6 @@ export default function BookingPage({
       </div>
     );
   }
-
-  const renderBookingDetails = () => (
-    <div className="space-y-2 text-sm text-gray-700">
-      <p>
-        <strong>Queue Position:</strong> {queuePosition ?? "N/A"}
-      </p>
-      <p>
-        <strong>Serial Number:</strong> {userSerial ?? "N/A"}
-      </p>
-      <p>
-        <strong>Estimated Wait Time:</strong>{" "}
-        {estimatedWaitTime > 0
-          ? `${Math.ceil(estimatedWaitTime / 60)} min`
-          : "N/A"}
-      </p>
-    </div>
-  );
 
   const renderBookingButton = () => {
     switch (bookingStatus.status) {
@@ -137,7 +114,7 @@ export default function BookingPage({
         return (
           <button
             disabled
-            className="w-full py-2 rounded bg-yellow-500 font-semibold  cursor-not-allowed"
+            className="w-full py-2 rounded bg-yellow-500 font-semibold cursor-not-allowed"
           >
             Booking in Queue...
           </button>
@@ -147,7 +124,7 @@ export default function BookingPage({
         return (
           <button
             disabled
-            className="w-full py-2 rounded bg-green-600 font-semibold  cursor-not-allowed"
+            className="w-full py-2 rounded bg-green-600 font-semibold cursor-not-allowed"
           >
             Booking Confirmed
           </button>
@@ -159,7 +136,7 @@ export default function BookingPage({
           <>
             <button
               onClick={handleBookingRequest}
-              className="w-full py-2 rounded bg-blue-600 hover:bg-blue-700 font-semibold "
+              className="w-full py-2 rounded bg-blue-600 hover:bg-blue-700 font-semibold"
             >
               Retry Booking
             </button>
@@ -178,7 +155,6 @@ export default function BookingPage({
     <div className="max-w-lg mx-auto p-6 rounded shadow-md">
       <h2 className="text-lg font-semibold mb-4 text-center">{eventTitle}</h2>
 
-      {bookingStatus.status === "queued" && renderBookingDetails()}
       {renderBookingButton()}
 
       {bookingStatus.status !== "failed" &&
